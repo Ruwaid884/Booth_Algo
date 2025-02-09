@@ -16,7 +16,7 @@ entity booth_encoder is
 end booth_encoder;
 
 architecture rtl of booth_encoder is
-    signal extended_multiplier : std_logic_vector(DATA_WIDTH+1 downto 0);
+    signal extended_multiplier : std_logic_vector(DATA_WIDTH+2 downto 0);
 begin
     process(clk, rst)
         variable pp_count : integer := 0;
@@ -31,26 +31,30 @@ begin
             
         elsif rising_edge(clk) then
             multiplicand_signed := signed(multiplicand);
-            extended_multiplier <= multiplier & "0";  -- Append one zero for proper encoding
+            extended_multiplier <= multiplier & "00";
             pp_count := 0;
             
             case mode is
                 when RADIX4 =>
                     -- Radix-4 Booth encoding
                     for i in 0 to DATA_WIDTH/2-1 loop
-                        case extended_multiplier(2*i+1 downto 2*i) is
-                            when "00" | "11" =>
+                        case extended_multiplier(2*i+2 downto 2*i) is
+                            when "000" | "111" =>
                                 temp_product := (others => '0');
-                            when "01" =>
+                            when "001" | "010" =>
                                 temp_product := multiplicand_signed;
-                            when "10" =>
+                            when "011" =>
+                                temp_product := shift_left(multiplicand_signed, 1);
+                            when "100" =>
+                                temp_product := -shift_left(multiplicand_signed, 1);
+                            when "101" | "110" =>
                                 temp_product := -multiplicand_signed;
                             when others =>
                                 temp_product := (others => '0');
                         end case;
                         
                         -- Shift based on position
-                        partial_products(pp_count) <= shift_left(temp_product, i);
+                        partial_products(pp_count) <= shift_left(temp_product, 2*i);
                         pp_count := pp_count + 1;
                     end loop;
                     
