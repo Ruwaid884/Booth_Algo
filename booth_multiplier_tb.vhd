@@ -22,25 +22,6 @@ architecture Behavioral of booth_multiplier_tb is
         );
     end component;
     
-    -- Component Declaration for Visualizer
-    component booth_multiplier_visualizer
-        generic (
-            N : integer := 4
-        );
-        Port ( 
-            clk          : in STD_LOGIC;
-            rst          : in STD_LOGIC;
-            M            : in STD_LOGIC_VECTOR(N-1 downto 0);
-            R            : in STD_LOGIC_VECTOR(N-1 downto 0);
-            A            : in STD_LOGIC_VECTOR(N-1 downto 0);
-            Q            : in STD_LOGIC_VECTOR(N-1 downto 0);
-            Q_1          : in STD_LOGIC;
-            state        : in STD_LOGIC_VECTOR(1 downto 0);
-            step_counter : in INTEGER;
-            done         : in STD_LOGIC
-        );
-    end component;
-    
     -- Constants
     constant CLK_PERIOD : time := 10 ns;
     constant N : integer := 4;
@@ -53,13 +34,6 @@ architecture Behavioral of booth_multiplier_tb is
     signal R       : STD_LOGIC_VECTOR(N-1 downto 0) := (others => '0');
     signal done    : STD_LOGIC;
     signal product : STD_LOGIC_VECTOR((2*N)-1 downto 0);
-    
-    -- Additional signals for visualization
-    signal A            : STD_LOGIC_VECTOR(N-1 downto 0);
-    signal Q            : STD_LOGIC_VECTOR(N-1 downto 0);
-    signal Q_1          : STD_LOGIC;
-    signal state        : STD_LOGIC_VECTOR(1 downto 0);
-    signal step_counter : INTEGER;
     
 begin
     -- Clock process
@@ -84,24 +58,6 @@ begin
             R       => R,
             done    => done,
             product => product
-        );
-        
-    -- Instantiate the Visualizer
-    VISUALIZER: booth_multiplier_visualizer
-        generic map (
-            N => N
-        )
-        port map (
-            clk          => clk,
-            rst          => rst,
-            M            => M,
-            R            => R,
-            A            => A,
-            Q            => Q,
-            Q_1          => Q_1,
-            state        => state,
-            step_counter => step_counter,
-            done         => done
         );
     
     -- Stimulus process
@@ -140,6 +96,8 @@ begin
         wait for CLK_PERIOD*2;
         
         -- End simulation
+        report "Simulation completed successfully!"
+        severity note;
         wait;
     end process;
     

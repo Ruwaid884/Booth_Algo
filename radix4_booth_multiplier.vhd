@@ -54,7 +54,7 @@ begin
                 when INITIALIZE =>
                     -- Initialize for Radix-4 Booth
                     A <= M & "00";  -- Extended multiplicand
-                    S <= (not (M & "00")) + '1';  -- Two's complement of multiplicand
+                    S <= std_logic_vector(-signed(M & "00"));  -- Two's complement of multiplicand
                     P <= (others => '0');
                     P(N downto 1) <= R;  -- Load multiplier
                     P(0) <= '0';  -- Extra bit for Booth encoding

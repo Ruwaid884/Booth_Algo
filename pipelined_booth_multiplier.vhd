@@ -66,7 +66,7 @@ begin
                 pipeline(0).M <= M;
                 pipeline(0).R <= R;
                 pipeline(0).A <= M & '0';
-                pipeline(0).S <= (not (M & '0')) + '1';
+                pipeline(0).S <= std_logic_vector(-signed(M & '0'));
                 pipeline(0).P <= (others => '0');
                 pipeline(0).P(N downto 1) <= R;
                 pipeline(0).count <= N/4-1;

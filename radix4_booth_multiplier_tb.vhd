@@ -2,12 +2,12 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
-entity intelligent_booth_multiplier_tb is
-end intelligent_booth_multiplier_tb;
+entity radix4_booth_multiplier_tb is
+end radix4_booth_multiplier_tb;
 
-architecture Behavioral of intelligent_booth_multiplier_tb is
+architecture Behavioral of radix4_booth_multiplier_tb is
     -- Component Declaration
-    component intelligent_booth_multiplier
+    component radix4_booth_multiplier
         generic (
             N : integer := 16
         );
@@ -57,7 +57,7 @@ begin
     end process;
     
     -- Instantiate the Unit Under Test (UUT)
-    UUT: intelligent_booth_multiplier 
+    UUT: radix4_booth_multiplier 
         generic map (
             N => N
         )
@@ -107,16 +107,30 @@ begin
         rst <= '0';
         wait for CLK_PERIOD;
         
-        -- Test cases
+        -- Test Case 1: Positive x Positive
         test_multiply(5, 3, 15);
+        
+        -- Test Case 2: Positive x Negative
         test_multiply(7, -4, -28);
+        
+        -- Test Case 3: Negative x Positive
         test_multiply(-6, 5, -30);
+        
+        -- Test Case 4: Negative x Negative
         test_multiply(-8, -7, 56);
+        
+        -- Test Case 5: Zero cases
         test_multiply(0, 123, 0);
         test_multiply(456, 0, 0);
+        
+        -- Test Case 6: Larger numbers
         test_multiply(1000, 1000, 1000000);
         test_multiply(-1000, 1000, -1000000);
+        
+        -- Test Case 7: Maximum positive numbers
         test_multiply(32767, 2, 65534);
+        
+        -- Test Case 8: Minimum negative numbers
         test_multiply(-32768, 2, -65536);
         
         -- End simulation
