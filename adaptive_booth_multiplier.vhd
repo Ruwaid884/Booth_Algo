@@ -44,6 +44,10 @@ architecture rtl of adaptive_booth_multiplier is
     signal encoder_num_products : integer range 0 to DATA_WIDTH/2;
     signal adder_result : std_logic_vector(2*DATA_WIDTH-1 downto 0);
     
+    -- Intermediate signals for adder connection
+    signal adder_partial_products : PARTIAL_PRODUCT(0 to DATA_WIDTH/2);
+    signal adder_num_products : integer range 0 to DATA_WIDTH/2;
+    
     -- State machine
     type state_type is (IDLE, CONFIGURE, ENCODE, ADD, PIPELINE_FORWARD, COMPLETE);
     signal state : state_type;
@@ -61,14 +65,23 @@ begin
             num_partial_products => encoder_num_products
         );
     
+    -- Update intermediate signals for adder
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            adder_partial_products <= pipeline(pipeline_stages-1).partial_products;
+            adder_num_products <= pipeline(pipeline_stages-1).num_products;
+        end if;
+    end process;
+    
     -- Adder unit instance
     adder: entity work.adder_unit
         port map (
             clk => clk,
             rst => rst,
             adder_type => selected_adder,
-            partial_products => pipeline(pipeline_stages-1).partial_products,
-            num_products => pipeline(pipeline_stages-1).num_products,
+            partial_products => adder_partial_products,
+            num_products => adder_num_products,
             result => adder_result
         );
     
@@ -82,6 +95,8 @@ begin
             done <= '0';
             result <= (others => '0');
             stage_counter := 0;
+            selected_mode <= RADIX4;
+            selected_adder <= CARRY_LOOKAHEAD;
             
             -- Reset pipeline
             for i in pipeline'range loop
@@ -103,8 +118,18 @@ begin
                     
                 when CONFIGURE =>
                     -- Apply configuration (with optional overrides)
-                    selected_mode <= force_mode when force_mode /= RADIX4 else current_config.mode;
-                    selected_adder <= force_adder when force_adder /= CARRY_LOOKAHEAD else current_config.adder_type;
+                    if force_mode /= RADIX4 then
+                        selected_mode <= force_mode;
+                    else
+                        selected_mode <= current_config.mode;
+                    end if;
+                    
+                    if force_adder /= CARRY_LOOKAHEAD then
+                        selected_adder <= force_adder;
+                    else
+                        selected_adder <= current_config.adder_type;
+                    end if;
+                    
                     stage_counter := 0;
                     state <= ENCODE;
                     
