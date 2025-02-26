@@ -55,7 +55,7 @@ begin
                         end case;
                         
                         resized_product := resize(shift_left(resize(temp_product, 2*DATA_WIDTH), 2*i), 2*DATA_WIDTH);
-                        partial_products(pp_count) <= resized_product(PARTIAL_PRODUCT_WIDTH-1 downto 0);
+                        partial_products(pp_count) <= resized_product(DATA_WIDTH-1 downto 0);
                         pp_count := pp_count + 1;
                     end loop;
                     
@@ -64,7 +64,7 @@ begin
                     for i in 0 to DATA_WIDTH-1 loop
                         if multiplier(i) = '1' then
                             resized_product := resize(shift_left(resize(multiplicand_signed, 2*DATA_WIDTH), i), 2*DATA_WIDTH);
-                            partial_products(pp_count) <= resized_product(PARTIAL_PRODUCT_WIDTH-1 downto 0);
+                            partial_products(pp_count) <= resized_product(DATA_WIDTH-1 downto 0);
                             pp_count := pp_count + 1;
                         end if;
                     end loop;
