@@ -373,7 +373,7 @@ begin
                 random_test_case.multiplicand_val := op1;
                 random_test_case.multiplier_val := op2;
                 random_test_case.expected_result := exp_result;
-                random_test_case.description := "Random test case                            ";
+                random_test_case.description := "Random test case                                  ";
                 
                 -- Set up test parameters
                 multiplicand <= to_slv(random_test_case.multiplicand_val, DATA_WIDTH);
