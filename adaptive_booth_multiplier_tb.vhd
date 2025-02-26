@@ -422,50 +422,17 @@ begin
                 
                 -- Output test results
                 if timeout_reached then
-                    if VERBOSE_OUTPUT then
-                        report int_to_str(random_test_case.id, 7) & " | " &
-                               int_to_str(random_test_case.multiplicand_val) & " | " &
-                               int_to_str(random_test_case.multiplier_val) & " | " &
-                               "TIMEOUT      | " &
-                               int_to_str(expected_result_int) & " | " &
-                               mode_to_str(random_test_case.mode) & " | " &
-                               adder_to_str(random_test_case.adder) & " | " &
-                               "FAILED - TIMEOUT" severity error;
-                    else
-                        report "Random test case " & integer'image(random_test_case.id) & 
-                               " FAILED: TIMEOUT" severity error;
-                    end if;
+                    report "Random test case " & integer'image(random_test_case.id) & 
+                           " FAILED: TIMEOUT" severity error;
                     failed_tests <= failed_tests + 1;
                 elsif actual_result_int = expected_result_int then
-                    if VERBOSE_OUTPUT then
-                        report int_to_str(random_test_case.id, 7) & " | " &
-                               int_to_str(random_test_case.multiplicand_val) & " | " &
-                               int_to_str(random_test_case.multiplier_val) & " | " &
-                               int_to_str(actual_result_int) & " | " &
-                               int_to_str(expected_result_int) & " | " &
-                               mode_to_str(random_test_case.mode) & " | " &
-                               adder_to_str(random_test_case.adder) & " | " &
-                               "PASSED (" & integer'image(test_cycles) & " cycles)" severity note;
-                    else
-                        report "Random test case " & integer'image(random_test_case.id) & 
-                               " PASSED in " & integer'image(test_cycles) & " cycles" severity note;
-                    end if;
+                    report "Random test case " & integer'image(random_test_case.id) & 
+                           " PASSED in " & integer'image(test_cycles) & " cycles" severity note;
                     passed_tests <= passed_tests + 1;
                 else
-                    if VERBOSE_OUTPUT then
-                        report int_to_str(random_test_case.id, 7) & " | " &
-                               int_to_str(random_test_case.multiplicand_val) & " | " &
-                               int_to_str(random_test_case.multiplier_val) & " | " &
-                               int_to_str(actual_result_int) & " | " &
-                               int_to_str(expected_result_int) & " | " &
-                               mode_to_str(random_test_case.mode) & " | " &
-                               adder_to_str(random_test_case.adder) & " | " &
-                               "FAILED" severity error;
-                    else
-                        report "Random test case " & integer'image(random_test_case.id) & 
-                               " FAILED: Expected " & integer'image(expected_result_int) & 
-                               " but got " & integer'image(actual_result_int) severity error;
-                    end if;
+                    report "Random test case " & integer'image(random_test_case.id) & 
+                           " FAILED: Expected " & integer'image(expected_result_int) & 
+                           " but got " & integer'image(actual_result_int) severity error;
                     failed_tests <= failed_tests + 1;
                 end if;
                 
