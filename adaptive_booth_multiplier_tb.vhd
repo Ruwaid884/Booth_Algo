@@ -184,11 +184,14 @@ begin
     begin
         if rst = '1' then
             cycle_counter <= 0;
+            test_cycles <= 0;
         elsif rising_edge(clk) then
             cycle_counter <= cycle_counter + 1;
             
             if test_running then
                 test_cycles <= test_cycles + 1;
+            else
+                test_cycles <= 0;  -- Reset test_cycles when not running a test
             end if;
         end if;
     end process;
@@ -224,7 +227,7 @@ begin
         for i in predefined_tests'range loop
             -- Initialize test
             test_running <= false;
-            test_cycles <= 0;
+            wait for CLK_PERIOD;  -- Wait for test_cycles to be reset
             total_tests <= total_tests + 1;
             
             -- Set up test parameters
@@ -237,7 +240,6 @@ begin
             expected_result_slv := to_slv(expected_result_int, 2*DATA_WIDTH);
             
             -- Start multiplication
-            wait for CLK_PERIOD;
             test_running <= true;
             start <= '1';
             wait for CLK_PERIOD;
@@ -259,6 +261,7 @@ begin
             
             -- Check result
             test_running <= false;
+            wait for CLK_PERIOD;  -- Wait for test_cycles to update
             actual_result_slv := result;
             actual_result_int := to_integer(signed(actual_result_slv));
             
@@ -341,7 +344,7 @@ begin
             for i in 1 to NUM_RANDOM_TESTS loop
                 -- Initialize test
                 test_running <= false;
-                test_cycles <= 0;
+                wait for CLK_PERIOD;  -- Wait for test_cycles to be reset
                 total_tests <= total_tests + 1;
                 
                 -- Generate random test case
@@ -370,9 +373,6 @@ begin
                 random_test_case.multiplicand_val := op1;
                 random_test_case.multiplier_val := op2;
                 random_test_case.expected_result := exp_result;
-                random_test_case.mode := random_test_case.mode;
-                random_test_case.adder := random_test_case.adder;
-                random_test_case.stages := random_test_case.stages;
                 
                 -- Set up test parameters
                 multiplicand <= to_slv(random_test_case.multiplicand_val, DATA_WIDTH);
@@ -384,7 +384,6 @@ begin
                 expected_result_slv := to_slv(expected_result_int, 2*DATA_WIDTH);
                 
                 -- Start multiplication
-                wait for CLK_PERIOD;
                 test_running <= true;
                 start <= '1';
                 wait for CLK_PERIOD;
@@ -406,6 +405,7 @@ begin
                 
                 -- Check result
                 test_running <= false;
+                wait for CLK_PERIOD;  -- Wait for test_cycles to update
                 actual_result_slv := result;
                 actual_result_int := to_integer(signed(actual_result_slv));
                 
