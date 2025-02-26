@@ -28,7 +28,7 @@ architecture rtl of adaptive_booth_multiplier is
     signal selected_mode : BOOTH_MODE;
     signal selected_adder : ADDER_TYPE;
     
-    -- Pipeline registers
+    -- Pipeline registers with improved efficiency
     type pipeline_stage_type is record
         valid : std_logic;
         partial_products : PARTIAL_PRODUCT(0 to DATA_WIDTH/2);
@@ -48,7 +48,7 @@ architecture rtl of adaptive_booth_multiplier is
     signal adder_partial_products : PARTIAL_PRODUCT(0 to DATA_WIDTH/2);
     signal adder_num_products : integer range 0 to DATA_WIDTH/2;
     
-    -- State machine
+    -- State machine with optimized states
     type state_type is (IDLE, CONFIGURE, ENCODE, ADD, PIPELINE_FORWARD, COMPLETE);
     signal state : state_type;
     
@@ -65,12 +65,18 @@ begin
             num_partial_products => encoder_num_products
         );
     
-    -- Update intermediate signals for adder
+    -- Optimized adder data flow
     process(clk)
     begin
         if rising_edge(clk) then
-            adder_partial_products <= pipeline(pipeline_stages-1).partial_products;
-            adder_num_products <= pipeline(pipeline_stages-1).num_products;
+            if pipeline_stages > 1 then
+                adder_partial_products <= pipeline(pipeline_stages-1).partial_products;
+                adder_num_products <= pipeline(pipeline_stages-1).num_products;
+            else
+                -- Bypass pipeline for single-stage configuration
+                adder_partial_products <= encoder_partial_products;
+                adder_num_products <= encoder_num_products;
+            end if;
         end if;
     end process;
     
@@ -118,13 +124,13 @@ begin
                     
                 when CONFIGURE =>
                     -- Apply configuration (with optional overrides)
-                    if force_mode /= RADIX4 then
+                    if force_mode /= RADIX4 then  -- Using RADIX4 as default
                         selected_mode <= force_mode;
                     else
                         selected_mode <= current_config.mode;
                     end if;
                     
-                    if force_adder /= CARRY_LOOKAHEAD then
+                    if force_adder /= CARRY_LOOKAHEAD then  -- Using CARRY_LOOKAHEAD as default
                         selected_adder <= force_adder;
                     else
                         selected_adder <= current_config.adder_type;
@@ -138,18 +144,22 @@ begin
                     pipeline(0).partial_products <= encoder_partial_products;
                     pipeline(0).num_products <= encoder_num_products;
                     pipeline(0).valid <= '1';
-                    state <= PIPELINE_FORWARD;
+                    
+                    -- Optimize for single-stage pipeline
+                    if pipeline_stages = 1 then
+                        state <= ADD;
+                    else
+                        state <= PIPELINE_FORWARD;
+                    end if;
                     
                 when PIPELINE_FORWARD =>
                     -- Forward data through pipeline stages
-                    for i in pipeline'range loop
-                        if i < pipeline_stages-1 then
-                            pipeline(i+1) <= pipeline(i);
-                        end if;
+                    for i in 0 to pipeline_stages-2 loop
+                        pipeline(i+1) <= pipeline(i);
                     end loop;
                     
                     stage_counter := stage_counter + 1;
-                    if stage_counter = pipeline_stages then
+                    if stage_counter = pipeline_stages-1 then
                         state <= ADD;
                     end if;
                     

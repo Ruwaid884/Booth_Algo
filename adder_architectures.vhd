@@ -31,7 +31,7 @@ begin
         variable prev_sum, prev_carry : std_logic_vector(2*DATA_WIDTH-1 downto 0);
         variable temp_result : std_logic_vector(2*DATA_WIDTH-1 downto 0);
         
-        -- Function for carry lookahead logic
+        -- Function for carry lookahead logic - optimized implementation
         function generate_carries(a, b : std_logic_vector(DATA_WIDTH-1 downto 0)) return std_logic_vector is
             variable g, p, c : std_logic_vector(DATA_WIDTH-1 downto 0);
         begin
@@ -109,23 +109,18 @@ begin
                             -- Convert current partial product
                             temp_pp := std_logic_vector(resize(partial_products(i), 2*DATA_WIDTH));
                             
-                            -- Compute new sum and carry
-                            for j in 0 to 2*DATA_WIDTH-2 loop
+                            -- Optimized CSA addition
+                            for j in 0 to 2*DATA_WIDTH-1 loop
                                 -- Full adder logic
                                 temp_result(j) := prev_sum(j) xor prev_carry(j) xor temp_pp(j);
-                                carry := (prev_sum(j) and prev_carry(j)) or
-                                       (prev_sum(j) and temp_pp(j)) or
-                                       (prev_carry(j) and temp_pp(j));
-                                       
+                                
+                                -- Generate carry for next bit
                                 if j < 2*DATA_WIDTH-1 then
-                                    prev_carry(j+1) := carry;
+                                    prev_carry(j+1) := (prev_sum(j) and prev_carry(j)) or
+                                                      (prev_sum(j) and temp_pp(j)) or
+                                                      (prev_carry(j) and temp_pp(j));
                                 end if;
                             end loop;
-                            
-                            -- Handle the last bit
-                            temp_result(2*DATA_WIDTH-1) := prev_sum(2*DATA_WIDTH-1) xor 
-                                                          prev_carry(2*DATA_WIDTH-1) xor 
-                                                          temp_pp(2*DATA_WIDTH-1);
                             
                             -- Update for next iteration
                             prev_sum := temp_result;

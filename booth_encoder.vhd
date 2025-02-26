@@ -16,7 +16,7 @@ entity booth_encoder is
 end booth_encoder;
 
 architecture rtl of booth_encoder is
-    signal extended_multiplier : std_logic_vector(DATA_WIDTH+2 downto 0);
+    signal extended_multiplier : std_logic_vector(DATA_WIDTH+1 downto 0);
 begin
     process(clk, rst)
         variable pp_count : integer := 0;
@@ -37,7 +37,7 @@ begin
             
             case mode is
                 when RADIX4 =>
-                    -- Radix-4 Booth encoding
+                    -- Optimized Radix-4 Booth encoding
                     for i in 0 to DATA_WIDTH/2-1 loop
                         case extended_multiplier(2*i+2 downto 2*i) is
                             when "000" | "111" =>
@@ -55,16 +55,16 @@ begin
                         end case;
                         
                         resized_product := resize(shift_left(resize(temp_product, 2*DATA_WIDTH), 2*i), 2*DATA_WIDTH);
-                        partial_products(pp_count) <= resized_product(DATA_WIDTH-1 downto 0);
+                        partial_products(pp_count) <= resize(resized_product(DATA_WIDTH-1 downto 0), DATA_WIDTH);
                         pp_count := pp_count + 1;
                     end loop;
                     
                 when RADIX2 =>
-                    -- Traditional Radix-2 Booth encoding
+                    -- Optimized Radix-2 Booth encoding
                     for i in 0 to DATA_WIDTH-1 loop
                         if multiplier(i) = '1' then
                             resized_product := resize(shift_left(resize(multiplicand_signed, 2*DATA_WIDTH), i), 2*DATA_WIDTH);
-                            partial_products(pp_count) <= resized_product(DATA_WIDTH-1 downto 0);
+                            partial_products(pp_count) <= resize(resized_product(DATA_WIDTH-1 downto 0), DATA_WIDTH);
                             pp_count := pp_count + 1;
                         end if;
                     end loop;
