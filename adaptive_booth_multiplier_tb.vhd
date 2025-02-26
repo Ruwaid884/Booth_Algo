@@ -49,7 +49,6 @@ architecture behavior of adaptive_booth_multiplier_tb is
         multiplicand_val : integer;           -- Multiplicand value
         multiplier_val : integer;             -- Multiplier value
         expected_result : integer;            -- Expected result
-        description : string(1 to 30);        -- Test case description (shorter fixed length)
         mode : BOOTH_MODE;                    -- Booth mode to use
         adder : ADDER_TYPE;                   -- Adder type to use
         stages : integer range 1 to 4;        -- Pipeline stages
@@ -59,31 +58,31 @@ architecture behavior of adaptive_booth_multiplier_tb is
     type test_cases_array is array (natural range <>) of test_case_type;
     constant predefined_tests : test_cases_array := (
         -- Basic test cases
-        (1, 0, 0, 0, "Zero multiplication test         ", RADIX4, CARRY_LOOKAHEAD, 2),
-        (2, 1, 1, 1, "Identity multiplication          ", RADIX4, CARRY_LOOKAHEAD, 2),
-        (3, 5, 7, 35, "Simple small numbers             ", RADIX2, RIPPLE_CARRY, 1),
+        (1, 0, 0, 0, RADIX4, CARRY_LOOKAHEAD, 2),
+        (2, 1, 1, 1, RADIX4, CARRY_LOOKAHEAD, 2),
+        (3, 5, 7, 35, RADIX2, RIPPLE_CARRY, 1),
         
         -- Power of two test cases
-        (4, 4, 8, 32, "Powers of 2 multiplication       ", RADIX4, CARRY_LOOKAHEAD, 2),
-        (5, 16, 16, 256, "Square of power of 2            ", RADIX4, CARRY_SAVE, 3),
+        (4, 4, 8, 32, RADIX4, CARRY_LOOKAHEAD, 2),
+        (5, 16, 16, 256, RADIX4, CARRY_SAVE, 3),
         
         -- Negative number tests
-        (6, -5, 7, -35, "Negative multiplicand            ", RADIX4, CARRY_LOOKAHEAD, 2),
-        (7, 12, -6, -72, "Negative multiplier             ", RADIX2, CARRY_SAVE, 2),
-        (8, -25, -4, 100, "Both negative                   ", RADIX4, CARRY_LOOKAHEAD, 3),
+        (6, -5, 7, -35, RADIX4, CARRY_LOOKAHEAD, 2),
+        (7, 12, -6, -72, RADIX2, CARRY_SAVE, 2),
+        (8, -25, -4, 100, RADIX4, CARRY_LOOKAHEAD, 3),
         
         -- Edge cases
-        (9, 2147483647, 1, 2147483647, "Maximum positive 32-bit        ", RADIX4, CARRY_SAVE, 4),
-        (10, -2147483648, 1, -2147483648, "Maximum negative 32-bit        ", RADIX4, CARRY_SAVE, 4),
+        (9, 2147483647, 1, 2147483647, RADIX4, CARRY_SAVE, 4),
+        (10, -2147483648, 1, -2147483648, RADIX4, CARRY_SAVE, 4),
         
         -- Specific bit pattern tests
-        (11, 65535, 65535, 4294836225, "All ones (0xFFFF x 0xFFFF)      ", RADIX2, CARRY_SAVE, 3),
-        (12, 43690, 21845, 954437050, "Alternating 1-0 patterns         ", RADIX4, CARRY_LOOKAHEAD, 2),
+        (11, 65535, 65535, 4294836225, RADIX2, CARRY_SAVE, 3),
+        (12, 43690, 21845, 954437050, RADIX4, CARRY_LOOKAHEAD, 2),
         
         -- Testing different adder configurations
-        (13, 1234, 5678, 7006652, "Medium numbers - Ripple Carry    ", RADIX4, RIPPLE_CARRY, 2),
-        (14, 1234, 5678, 7006652, "Medium numbers - Carry Lookahead ", RADIX4, CARRY_LOOKAHEAD, 2),
-        (15, 1234, 5678, 7006652, "Medium numbers - Carry Save      ", RADIX4, CARRY_SAVE, 2)
+        (13, 1234, 5678, 7006652, RADIX4, RIPPLE_CARRY, 2),
+        (14, 1234, 5678, 7006652, RADIX4, CARRY_LOOKAHEAD, 2),
+        (15, 1234, 5678, 7006652, RADIX4, CARRY_SAVE, 2)
     );
     
     -- Random test case generation
@@ -287,7 +286,7 @@ begin
                            "FAILED - TIMEOUT" severity error;
                 else
                     report "Test case " & integer'image(predefined_tests(i).id) & 
-                           " (" & predefined_tests(i).description & ") FAILED: TIMEOUT" severity error;
+                           " FAILED: TIMEOUT" severity error;
                 end if;
                 failed_tests <= failed_tests + 1;
             elsif actual_result_int = expected_result_int then
@@ -302,8 +301,7 @@ begin
                            "PASSED (" & integer'image(test_cycles) & " cycles)" severity note;
                 else
                     report "Test case " & integer'image(predefined_tests(i).id) & 
-                           " (" & predefined_tests(i).description & ") PASSED in " & 
-                           integer'image(test_cycles) & " cycles" severity note;
+                           " PASSED in " & integer'image(test_cycles) & " cycles" severity note;
                 end if;
                 passed_tests <= passed_tests + 1;
             else
@@ -318,8 +316,7 @@ begin
                            "FAILED" severity error;
                 else
                     report "Test case " & integer'image(predefined_tests(i).id) & 
-                           " (" & predefined_tests(i).description & ") FAILED: " & 
-                           "Expected " & integer'image(expected_result_int) & 
+                           " FAILED: Expected " & integer'image(expected_result_int) & 
                            " but got " & integer'image(actual_result_int) severity error;
                 end if;
                 failed_tests <= failed_tests + 1;
@@ -373,7 +370,9 @@ begin
                 random_test_case.multiplicand_val := op1;
                 random_test_case.multiplier_val := op2;
                 random_test_case.expected_result := exp_result;
-                random_test_case.description := "Random test case              ";
+                random_test_case.mode := random_test_case.mode;
+                random_test_case.adder := random_test_case.adder;
+                random_test_case.stages := random_test_case.stages;
                 
                 -- Set up test parameters
                 multiplicand <= to_slv(random_test_case.multiplicand_val, DATA_WIDTH);
