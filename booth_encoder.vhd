@@ -22,8 +22,7 @@ begin
         variable pp_count : integer := 0;
         variable temp_product : signed(DATA_WIDTH-1 downto 0);
         variable multiplicand_signed : signed(DATA_WIDTH-1 downto 0);
-        variable multiplier_signed : signed(DATA_WIDTH-1 downto 0);
-        variable resized_product : signed(2*DATA_WIDTH-1 downto 0);
+        variable shifted_product : signed(2*DATA_WIDTH-1 downto 0);
     begin
         if rst = '1' then
             for i in partial_products'range loop
@@ -34,8 +33,7 @@ begin
         elsif rising_edge(clk) then
             pp_count := 0;
             multiplicand_signed := signed(multiplicand);
-            multiplier_signed := signed(multiplier);
-            extended_multiplier <= multiplier & "0";
+            extended_multiplier <= multiplier & '0';
             
             case mode is
                 when RADIX4 =>
@@ -55,16 +53,22 @@ begin
                                 temp_product := (others => '0');
                         end case;
                         
-                        resized_product := shift_left(resize(temp_product, 2*DATA_WIDTH), 2*i);
-                        partial_products(pp_count) <= std_logic_vector(resize(resized_product(DATA_WIDTH-1 downto 0), DATA_WIDTH));
+                        shifted_product := shift_left(resize(temp_product, 2*DATA_WIDTH), 2*i);
+                        partial_products(pp_count) <= std_logic_vector(
+                            resize(shifted_product(DATA_WIDTH-1 downto 0), DATA_WIDTH)
+                        );
                         pp_count := pp_count + 1;
                     end loop;
                     
                 when RADIX2 =>
                     for i in 0 to DATA_WIDTH-1 loop
                         if multiplier(i) = '1' then
-                            resized_product := shift_left(resize(multiplicand_signed, 2*DATA_WIDTH), i);
-                            partial_products(pp_count) <= std_logic_vector(resize(resized_product(DATA_WIDTH-1 downto 0), DATA_WIDTH));
+                            shifted_product := shift_left(
+                                resize(multiplicand_signed, 2*DATA_WIDTH), i
+                            );
+                            partial_products(pp_count) <= std_logic_vector(
+                                resize(shifted_product(DATA_WIDTH-1 downto 0), DATA_WIDTH)
+                            );
                             pp_count := pp_count + 1;
                         end if;
                     end loop;
