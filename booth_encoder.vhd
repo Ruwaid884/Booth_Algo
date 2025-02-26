@@ -54,7 +54,7 @@ begin
                         end case;
                         
                         -- Shift based on position
-                        partial_products(pp_count) <= shift_left(temp_product, 2*i);
+                        partial_products(pp_count) <= resize(shift_left(temp_product, 2*i), DATA_WIDTH);
                         pp_count := pp_count + 1;
                     end loop;
                     
