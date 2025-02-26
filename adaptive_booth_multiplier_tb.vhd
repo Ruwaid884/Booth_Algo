@@ -11,7 +11,6 @@ entity adaptive_booth_multiplier_tb is
     generic (
         ENABLE_RANDOM_TESTS : boolean := true;   -- Enable random test cases
         NUM_RANDOM_TESTS : integer := 10;        -- Number of random tests to run
-        VERBOSE_OUTPUT : boolean := true;        -- Enable detailed console output
         TIMEOUT_CYCLES : integer := 100          -- Maximum cycles to wait for completion
     );
 end adaptive_booth_multiplier_tb;
@@ -219,10 +218,6 @@ begin
         -- Run all predefined test cases
         report "STARTING PREDEFINED TEST CASES..." severity note;
         report "-------------------------------------------------------------------------" severity note;
-        if VERBOSE_OUTPUT then
-            report "TEST ID | MULTIPLICAND |  MULTIPLIER  |    RESULT    |   EXPECTED   | BOOTH MODE  | ADDER TYPE   | STATUS" severity note;
-            report "-------------------------------------------------------------------------" severity note;
-        end if;
         
         for i in predefined_tests'range loop
             -- Initialize test
@@ -278,50 +273,17 @@ begin
             
             -- Output test results
             if timeout_reached then
-                if VERBOSE_OUTPUT then
-                    report int_to_str(predefined_tests(i).id, 7) & " | " &
-                           int_to_str(predefined_tests(i).multiplicand_val) & " | " &
-                           int_to_str(predefined_tests(i).multiplier_val) & " | " &
-                           "TIMEOUT      | " &
-                           int_to_str(expected_result_int) & " | " &
-                           mode_to_str(predefined_tests(i).mode) & " | " &
-                           adder_to_str(predefined_tests(i).adder) & " | " &
-                           "FAILED - TIMEOUT" severity error;
-                else
-                    report "Test case " & integer'image(predefined_tests(i).id) & 
-                           " FAILED: TIMEOUT" severity error;
-                end if;
+                report "Test case " & integer'image(predefined_tests(i).id) & 
+                       " FAILED: TIMEOUT" severity error;
                 failed_tests <= failed_tests + 1;
             elsif actual_result_int = expected_result_int then
-                if VERBOSE_OUTPUT then
-                    report int_to_str(predefined_tests(i).id, 7) & " | " &
-                           int_to_str(predefined_tests(i).multiplicand_val) & " | " &
-                           int_to_str(predefined_tests(i).multiplier_val) & " | " &
-                           int_to_str(actual_result_int) & " | " &
-                           int_to_str(expected_result_int) & " | " &
-                           mode_to_str(predefined_tests(i).mode) & " | " &
-                           adder_to_str(predefined_tests(i).adder) & " | " &
-                           "PASSED (" & integer'image(test_cycles) & " cycles)" severity note;
-                else
-                    report "Test case " & integer'image(predefined_tests(i).id) & 
-                           " PASSED in " & integer'image(test_cycles) & " cycles" severity note;
-                end if;
+                report "Test case " & integer'image(predefined_tests(i).id) & 
+                       " PASSED in " & integer'image(test_cycles) & " cycles" severity note;
                 passed_tests <= passed_tests + 1;
             else
-                if VERBOSE_OUTPUT then
-                    report int_to_str(predefined_tests(i).id, 7) & " | " &
-                           int_to_str(predefined_tests(i).multiplicand_val) & " | " &
-                           int_to_str(predefined_tests(i).multiplier_val) & " | " &
-                           int_to_str(actual_result_int) & " | " &
-                           int_to_str(expected_result_int) & " | " &
-                           mode_to_str(predefined_tests(i).mode) & " | " &
-                           adder_to_str(predefined_tests(i).adder) & " | " &
-                           "FAILED" severity error;
-                else
-                    report "Test case " & integer'image(predefined_tests(i).id) & 
-                           " FAILED: Expected " & integer'image(expected_result_int) & 
-                           " but got " & integer'image(actual_result_int) severity error;
-                end if;
+                report "Test case " & integer'image(predefined_tests(i).id) & 
+                       " FAILED: Expected " & integer'image(expected_result_int) & 
+                       " but got " & integer'image(actual_result_int) severity error;
                 failed_tests <= failed_tests + 1;
             end if;
             
@@ -334,11 +296,6 @@ begin
             report "-------------------------------------------------------------------------" severity note;
             report "STARTING RANDOM TEST CASES..." severity note;
             report "-------------------------------------------------------------------------" severity note;
-            
-            if VERBOSE_OUTPUT then
-                report "TEST ID | MULTIPLICAND |  MULTIPLIER  |    RESULT    |   EXPECTED   | BOOTH MODE  | ADDER TYPE   | STATUS" severity note;
-                report "-------------------------------------------------------------------------" severity note;
-            end if;
             
             -- Run specified number of random tests
             for i in 1 to NUM_RANDOM_TESTS loop
